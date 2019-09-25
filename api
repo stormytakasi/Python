@@ -1,0 +1,93 @@
+#!flask/bin/python
+from typing import Dict, List, Union, Any
+
+from flask import Flask, request, jsonify, url_for
+
+app = Flask(__name__)
+
+tasks = [
+    {
+        'id': 1,
+        'title': u'Learn python',
+        'desc': u'I need learn python',
+    },
+    {
+        'id': 2,
+        'title': u'Buy groceries',
+        'desc': u'Milk, Cheese, Pizza, Fruit, Tylesadsadnol',
+    }
+]
+
+
+def make_public_task(task):
+    new_task = {}
+    for field in task:
+        if field == 'id':
+            new_task['uri'] = url_for('get_task', task_id=task['id'], _external=True)
+        else:
+            new_task[field] = task[field]
+    return new_task
+
+
+@app.route('/taskslist', methods=['POST'])
+def get_tasks():
+    try:
+        ids = request.json['id']
+        id = ids - 1
+        return jsonify({'tasks': tasks[id]})
+    except:
+        return jsonify({'tasks': tasks})
+
+
+@app.route('/taskspost', methods=['POST'])
+def create_deneme():
+    deneme = {
+        'id': len(tasks) + 1,
+        'title': request.json['title'],
+        'desc': request.json['desc']
+    }
+    tasks.append(deneme)
+    return jsonify({'deneme': deneme})
+
+
+@app.route('/tasksdelete', methods=['DELETE'])
+def delete_deneme():
+    done = request.json['id'] - 1
+    tasks.pop(done)
+    print(tasks)
+    return jsonify({'tasks': tasks})
+
+
+@app.route('/tasksupdate/<id>', methods=['PUT'])
+def updateDeneme(id):
+    done = [ deneme for deneme in tasks if (deneme['id'] == id) ]
+    if 'title' in request.json:
+        done[0]['title'] = request.json('title', done[0]['title'])
+    if 'desc' in request.json:
+        done[0]['desc'] = request.json('desc', done[0]['desc'])
+    return jsonify({'tasks': tasks})
+
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
+
+
+    # dene = request.json['id'] -1
+    # tasks.pop(done)
+    # if 'desc' in request.json:
+    #     deneme = {
+    #         'id': dene,
+    #         'desc': request.json['title']
+    #               }
+    # if 'title' in request.json:
+    #         deneme = {
+    #             'id': dene,
+    #             'title': request.json['title']
+    #         }
+    # if 'title' and 'desc' in request.json:
+    #  deneme = {
+    #     'id': dene,
+    #     'title': request.json['title'],
+    #     'desc': request.json['desc']
+    #            }
+    # tasks.append(deneme)
